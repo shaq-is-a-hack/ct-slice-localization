@@ -37,7 +37,7 @@ st.markdown(
         </div>
     </div>
     <div style='font-size: 0.95rem; color: #444; margin-bottom: 1rem;'>
-        This tool predicts the axial location of a CT scan slice along the head-to-toe body axis based on directional features of bone density and air presence.
+        This tool predicts the axial location of a CAT scan slice along the head-to-toe body axis based on directional features of bone density and air presence.
     </div>
     """,
     unsafe_allow_html=True
@@ -123,7 +123,7 @@ if st.button("🔍 Run Prediction", type="primary"):
 
     st.markdown("#### 📌 Prediction Error")
     st.markdown(f"**MAE**: `{mae_sample:.4f}`")
-    
+
 # --- Info Expander ---
 with st.expander("💡 What does this data represent?"):
     st.markdown("""
