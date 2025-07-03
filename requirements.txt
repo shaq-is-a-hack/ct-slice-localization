@@ -1,0 +1,8 @@
+streamlit
+scikit-learn
+lightgbm
+pandas
+numpy
+joblib
+matplotlib
+tqdm
