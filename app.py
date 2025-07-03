@@ -25,7 +25,7 @@ Pick a sample, view the directional features, and check how close the model's gu
 sample_idx = st.sidebar.selectbox("Pick a CT Slice Sample", range(len(X_test)), format_func=lambda i: f"Sample #{i}")
 
 # Extract selected sample
-sample_features = pd.Series(X_test[sample_idx], index=feature_names)
+sample_features = X_test.iloc[sample_idx]
 actual_position = y_test[sample_idx]
 
 # Prepare histogram data
