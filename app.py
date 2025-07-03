@@ -1,10 +1,10 @@
-import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import joblib
+import streamlit as st
+import matplotlib.pyplot as plt
 
-# --- Load Assets ---
+# Load model and preprocessing tools
 model = joblib.load("lightgbm_model.pkl")
 scaler = joblib.load("scaler.pkl")
 imputer = joblib.load("imputer.pkl")
@@ -12,45 +12,53 @@ X_test = joblib.load("X_test.pkl")
 y_test = joblib.load("y_test.pkl")
 feature_names = joblib.load("feature_names.pkl")
 
-# --- Streamlit Page Settings ---
-st.set_page_config(page_title="I Scan Explain", layout="wide")
-st.title("🧠 I Scan Explain")
-st.markdown(
-    "Predict the **axial location** of a CT scan slice using histogram features derived from bone and air structures."
-)
+# Set up page
+st.set_page_config(page_title="Where's the CAT?", layout="wide")
+st.title("🧠 Where’s the CAT?")
+st.markdown("""
+This app predicts the **position of a CT slice** along the head-to-toe axis based on patterns of **bone density** and **air presence**.
 
-# --- Sample Selector ---
-index = st.selectbox("Choose a sample index to visualize and predict:", X_test.index.tolist())
+Pick a sample, view the directional features, and check how close the model's guess is.
+""")
 
-sample = X_test.loc[index]
-true = y_test[index]
-predicted = model.predict([sample])[0]
-mae = abs(predicted - true)
+# Sidebar sample selector
+sample_idx = st.sidebar.selectbox("Pick a CT Slice Sample", range(len(X_test)), format_func=lambda i: f"Sample #{i}")
 
-# --- Feature Visualization ---
-st.subheader("Feature Histogram")
-fig, ax = plt.subplots(figsize=(12, 4))
-ax.bar(range(len(sample)), sample.values)
-ax.set_title("Bone & Air Histogram Bins")
-ax.set_xlabel("Feature Bin Index")
-ax.set_ylabel("Normalized Value")
+# Extract selected sample
+sample_features = pd.Series(X_test[sample_idx], index=feature_names)
+actual_position = y_test[sample_idx]
+
+# Prepare histogram data
+bone_bins = sample_features[:241]
+air_bins = sample_features[241:]
+
+fig, ax = plt.subplots(figsize=(12, 5))
+ax.bar(range(1, 242), bone_bins, label="Bone (Density)", alpha=0.7)
+ax.bar(range(242, 385), air_bins, label="Air (Presence)", alpha=0.7)
+ax.set_xlabel("Direction Bin (Spread around CT slice)")
+ax.set_ylabel("Feature Value")
+ax.set_title("Direction-Based Features from CT Slice")
+ax.legend()
 st.pyplot(fig)
 
-# --- Output Section ---
-st.subheader("Prediction Summary")
-col1, col2, col3 = st.columns(3)
-col1.metric("Predicted Axial Pos.", f"{predicted:.2f}")
-col2.metric("True Position", f"{true:.2f}")
-col3.metric("MAE", f"{mae:.2f}")
+# Prediction button
+if st.button("🔍 Run Prediction"):
+    sample_array = np.array(sample_features).reshape(1, -1)
+    predicted = model.predict(sample_array)[0]
 
-# --- Position Visualization ---
-st.subheader("🧍 Human Body Axial Scale")
-fig2, ax2 = plt.subplots(figsize=(10, 1))
-ax2.plot([0, 180], [0, 0], color="lightgray", linewidth=10)
-ax2.scatter([predicted], [0], color="blue", label="Predicted", s=120, zorder=3)
-ax2.scatter([true], [0], color="green", label="Actual", s=120, zorder=3)
-ax2.set_xlim(0, 180)
-ax2.set_yticks([])
-ax2.set_xlabel("0 = Head   |   180 = Feet")
-ax2.legend(loc="upper right")
-st.pyplot(fig2)
+    st.success(f"📍 **Predicted Axial Position:** {predicted:.2f}")
+    st.info(f"📌 **Actual Axial Position:** {actual_position:.2f}")
+
+    # Visual gauge
+    st.markdown("### Estimated Position Along Body")
+    st.progress(min(max(int((predicted / 180) * 100), 0), 100))
+
+# Optional expandable info
+with st.expander("ℹ️ What does this data represent?", expanded=False):
+    st.markdown("""
+Each CT scan is described using two sets of features:
+- **Bone**: Measures where denser bone material appears around the slice (like skull or spine).
+- **Air**: Measures presence of air in various directions (like sinuses or lungs).
+
+These are captured as 384 directional readings around each CT slice. The model uses this to guess where the image was taken — top of the head is 0, bottom of the feet is 180.
+""")
