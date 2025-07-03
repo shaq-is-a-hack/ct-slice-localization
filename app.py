@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import joblib
 import matplotlib.pyplot as plt
+import joblib
 
-# Load trained model and preprocessing artifacts
+# --- Load Assets ---
 model = joblib.load("lightgbm_model.pkl")
 scaler = joblib.load("scaler.pkl")
 imputer = joblib.load("imputer.pkl")
@@ -12,39 +12,45 @@ X_test = joblib.load("X_test.pkl")
 y_test = joblib.load("y_test.pkl")
 feature_names = joblib.load("feature_names.pkl")
 
-# Ensure X_test is a DataFrame with correct columns
-if not isinstance(X_test, pd.DataFrame):
-    X_test = pd.DataFrame(X_test, columns=feature_names)
+# --- Streamlit Page Settings ---
+st.set_page_config(page_title="I Scan Explain", layout="wide")
+st.title("🧠 I Scan Explain")
+st.markdown(
+    "Predict the **axial location** of a CT scan slice using histogram features derived from bone and air structures."
+)
 
-# Streamlit UI setup
-st.set_page_config(page_title="Where's the CAT?", page_icon="🧠", layout="wide")
-st.title("🧠 Where's the CAT?")
-st.markdown("This app predicts the axial position of a CT scan slice based on histogram features of bone and air inclusions.")
+# --- Sample Selector ---
+index = st.selectbox("Choose a sample index to visualize and predict:", X_test.index.tolist())
 
-# Dropdown to select a sample
-sample_idx = st.selectbox("🧬 Choose a sample index to test", options=X_test.index.tolist())
+sample = X_test.loc[index]
+true = y_test[index]
+predicted = model.predict([sample])[0]
+mae = abs(predicted - true)
 
-# Visualize the selected sample's features
-sample = X_test.loc[sample_idx]
-st.subheader("🔍 Feature Overview (Histogram)")
-fig, ax = plt.subplots(figsize=(10, 3))
+# --- Feature Visualization ---
+st.subheader("Feature Histogram")
+fig, ax = plt.subplots(figsize=(12, 4))
 ax.bar(range(len(sample)), sample.values)
-ax.set_xlabel("Feature Index")
-ax.set_ylabel("Value")
+ax.set_title("Bone & Air Histogram Bins")
+ax.set_xlabel("Feature Bin Index")
+ax.set_ylabel("Normalized Value")
 st.pyplot(fig)
 
-# Run prediction
-if st.button("Run Prediction"):
-    sample_input = sample.values.reshape(1, -1)
-    prediction = model.predict(sample_input)[0]
-    actual = y_test.iloc[sample_idx]
-    error = abs(prediction - actual)
+# --- Output Section ---
+st.subheader("Prediction Summary")
+col1, col2, col3 = st.columns(3)
+col1.metric("Predicted Axial Pos.", f"{predicted:.2f}")
+col2.metric("True Position", f"{true:.2f}")
+col3.metric("MAE", f"{mae:.2f}")
 
-    st.subheader("📈 Prediction Results")
-    st.markdown(f"- **Predicted Axial Position:** {prediction:.2f}")
-    st.markdown(f"- **Actual Axial Position:** {actual:.2f}")
-    st.markdown(f"- **Mean Absolute Error:** {error:.2f}")
-
-    st.subheader("🩻 Position Indicator")
-    st.progress(min(int((prediction / 180) * 100), 100))
-    st.caption("0 = Top of Head ··· 180 = Bottom of Feet")
+# --- Position Visualization ---
+st.subheader("🧍 Human Body Axial Scale")
+fig2, ax2 = plt.subplots(figsize=(10, 1))
+ax2.plot([0, 180], [0, 0], color="lightgray", linewidth=10)
+ax2.scatter([predicted], [0], color="blue", label="Predicted", s=120, zorder=3)
+ax2.scatter([true], [0], color="green", label="Actual", s=120, zorder=3)
+ax2.set_xlim(0, 180)
+ax2.set_yticks([])
+ax2.set_xlabel("0 = Head   |   180 = Feet")
+ax2.legend(loc="upper right")
+st.pyplot(fig2)
