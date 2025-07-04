@@ -29,3 +29,11 @@ git clone https://github.com/shaq-is-a-hack/ct-slice-localization
 cd ct-slice-localization
 pip install -r requirements.txt
 streamlit run app.py
+```
+
+## Notes
+The terms "CAT" and "CT" are used interchangeably in this project to refer to the same medical imaging procedure, Computed Tomography. We’re aware that there’s probably a technical difference, but it’s minor for the purposes of this project. We are not medical professionals.
+
+If you are a rando on the internet who stumbled upon this group assignment for my uni coursework, here's a disclaimer:
+This project is meant for educational and academic purposes only. It is not designed, validated or approved for clinical or diagnostic use. DO NOT use this to inform medical decisions despite the profile picture being Dr. Gregory House from the hit 2000s TV series House M.D., and definitely DO NOT sue us. This being an undergrad project should be enough to imply amount of money the team members have to their names.
+
