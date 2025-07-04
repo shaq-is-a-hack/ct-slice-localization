@@ -126,14 +126,18 @@ if st.button("🔍 Run Prediction", type="primary"):
 
 # --- Info Expander ---
 with st.expander("💡 What does this data represent?"):
-    st.markdown("""
-- Each CT slice is converted into 384 values that represent **directional information**.
-- The first 241 values (blue bars) reflect **bone structures** around the slice.
-- The next 143 values (orange bars) reflect **air presence**, like lungs or air cavities.
+    st.markdown(
+        """
+Each CT slice is converted into 384 values that represent **directional information**.  
+- The first 241 values (blue bars) reflect **bone structures** around the slice.  
+- The next 143 values (orange bars) reflect **air presence**, like lungs or air cavities.  
 - The model uses these patterns to estimate where in the body the slice comes from.
 
-Axial position values range from:
-- `0`: top of the head
-- `180`: bottom of the feet
+Axial position values range from:  
+- `0`: top of the head  
+- `180`: bottom of the feet  
 
-Note: "CAT" and "CT" are used interchangably to refer to the medical imaging procedure of Computed Tomography.""")
+**Note:** "CAT" and "CT" are used interchangeably to refer to the medical imaging procedure of Computed Tomography.
+        """
+    )
+
