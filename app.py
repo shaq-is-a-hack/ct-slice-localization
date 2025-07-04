@@ -130,7 +130,7 @@ with st.expander("💡 What does this data represent?"):
         """
 Each CT slice is converted into 384 values that represent **directional information**.  
 - The first 241 values (blue bars) reflect **bone structures** around the slice.  
-- The next 143 values (orange bars) reflect **air presence**, like lungs or air cavities.  
+- The next 143 values (orange bars) reflect **air presence**, like lungs or air cavities. 
 - The model uses these patterns to estimate where in the body the slice comes from.
 
 Axial position values range from:  
