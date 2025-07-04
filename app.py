@@ -136,5 +136,4 @@ Axial position values range from:
 - `0`: top of the head
 - `180`: bottom of the feet
 
-Note: "CAT" and "CT" are used interchangably to refer to the medical imaging procedure of Computed Tomography.
-    """)
+Note: "CAT" and "CT" are used interchangably to refer to the medical imaging procedure of Computed Tomography.""")
